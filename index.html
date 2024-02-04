@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formatar Mandado de Prisão</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            display: flex;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
+            height: 60px;
+            background-color: #333;
+            color: white;
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+        }
+
+        main {
+            display: flex;
+            flex-direction: column;
+            width: 85%;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .textoInicial {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        #mandadoTexto {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: vertical;
+            outline: none;
+        }
+
+        label {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            font-size: 1rem;
+        }
+
+        #possuiFotoCheckbox {
+            margin-left: 10px;
+        }
+
+        .botoesContainer {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            flex: 1;
+            margin-top: 10px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #btnAnalisar {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        #btnLimpar {
+            background-color: rgb(173, 1, 1);
+            color: white;
+        }
+
+        #btnAnalisar:hover,
+        #btnLimpar:hover {
+            background-color: #45a049;
+        }
+
+        #resultados {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            width: 100%;
+        }
+
+        h3 {
+            width: 100%;
+            text-align: left;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        #resultadoFinal {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: vertical;
+            text-transform: uppercase;
+            outline: none;
+        }
+
+        #charCount {
+            position: absolute;
+            bottom: 15px;
+            right: 20px;
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        /* Estilo do checkbox */
+        .custom-checkbox {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .custom-checkbox input {
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .checkmark {
+            height: 20px;
+            width: 20px;
+            background-color: #eee;
+            border-radius: 3px;
+            margin-right: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ccc;
+        }
+
+        .custom-checkbox input:checked~.checkmark {
+            background-color: #4CAF50;
+            border: none;
+        }
+
+        .checkmark:after {
+            content: "\2713";
+            color: white;
+            font-size: 12px;
+            display: none;
+        }
+
+        .custom-checkbox input:checked~.checkmark:after {
+            display: flex;
+        }
+    </style>
+</head>
+
+<body>
+    <header>BNMP</header>
+    <main>
+        <div class="textoInicial">
+            <textarea id="mandadoTexto" cols="30" rows="10"
+                placeholder="Insira o texto do mandado de prisão aqui..."></textarea>
+            <label for="possuiFotoCheckbox" class="custom-checkbox">
+                <input type="checkbox" name="possuiFoto" id="possuiFotoCheckbox">
+                Possui foto?
+                <div class="checkmark"></div>
+            </label>
+
+
+            <!-- Adicione uma div para os botões e aplique um estilo flexível -->
+            <div class="botoesContainer">
+                <button id="btnAnalisar" onclick="analisarTexto()">Analisar</button>
+                <button id="btnLimpar" onclick="limparTextoEResultado()">Limpar</button>
+            </div>
+        </div>
+
+        <div id="resultados">
+            <h3>Resultados:</h3>
+            <textarea id="resultadoFinal" cols="30" rows="10"></textarea>
+            <button onclick="copiarResultado()">Copiar</button>
+            <span id="charCount">0 caracteres</span>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("btnLimpar").addEventListener("click", limparTextoEResultado);
+        });
+
+        function analisarTexto() {
+            var textoMandado = document.getElementById('mandadoTexto').value;
+
+            if (textoMandado.trim() === '') {
+                return;
+            }
+
+            if (!/^Mandado de Prisão/i.test(textoMandado.trim())) {
+                alert('O texto não parece ser um Mandado de Prisão.');
+                return;
+            }
+
+            var nome = extrairInformacao(textoMandado, /Nome: (.*?) RJI:/);
+            var rg = extrairInformacao(textoMandado, /RG: (.*?)(\s|$)/);
+            var cpf = extrairInformacao(textoMandado, /CPF: (\d{3}\.\d{3}\.\d{3}-\d{2}|\d{11})/, formatarCPF);
+            var nMandado = extrairInformacao(textoMandado, /N° do Mandado: (.*?)[\s\r\n]/);
+            var nProcesso = extrairInformacao(textoMandado, /Nº do processo: (.*?)[\s\r\n]/);
+            var dataValidade = extrairInformacao(textoMandado, /Data de validade:(\d{2}.\d{2}.\d{4})/, formatarData);
+            var tipPenal = extrairInformacao(textoMandado, /Tipificação Penal: (.*?)(?=\s*Teor do Documento:)/);
+            var dataExpedicao = extrairInformacao(textoMandado, /Local e Data:.*?(\d{1,2} de \w+ de \d{4})/, formatarDataExpedicao);
+
+            var possuiFoto = document.getElementById('possuiFotoCheckbox').checked;
+            var fotoDeteca = possuiFoto ? ', - POSSUI FOTO NO DETECTA' : '';
+
+            var resultadoFinal = `CONSTA VIA BNMP MANDADO DE PRISÃO EM DESFAVOR DE ${nome}, - RG: ${rg} - CPF: ${cpf}, - MANDADO: ${nMandado}, - DATA DE VALIDADE: ${dataValidade}, - Nº DO PROCESSO: ${nProcesso},`;
+
+            if (tipPenal !== 'Não encontrado') {
+                resultadoFinal += ` - TIPIFICACAO PENAL: ${tipPenal},`;
+            }
+
+            resultadoFinal += ` - EXPEDIDO EM: ${dataExpedicao}${fotoDeteca} / COPOM CAPTURA`;
+
+            document.getElementById('resultadoFinal').textContent = resultadoFinal;
+            updateCharCount();
+        }
+
+        function formatarCPF(cpf) {
+            cpf = cpf.replace(/\D/g, '');
+
+            if (cpf.length !== 11) {
+                return 'Não encontrado';
+            }
+
+            return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+        }
+
+        function extrairInformacao(texto, regex, formatar = (value) => value) {
+            var match = texto.match(regex);
+            return match ? formatar(match[1].trim()) : 'Não encontrado';
+        }
+
+        function formatarData(data) {
+            var partes = data.split('.');
+            return partes.length === 3 ? partes[0] + '/' + partes[1] + '/' + partes[2] : 'Formato de data inválido';
+        }
+
+        function formatarDataExpedicao(dataExpedicao) {
+            var partes = dataExpedicao.split(' de ');
+            if (partes.length === 3) {
+                var mes = partes[1];
+                var traducaoMes = {
+                    'janeiro': '01',
+                    'fevereiro': '02',
+                    'março': '03',
+                    'abril': '04',
+                    'maio': '05',
+                    'junho': '06',
+                    'julho': '07',
+                    'agosto': '08',
+                    'setembro': '09',
+                    'outubro': '10',
+                    'novembro': '11',
+                    'dezembro': '12'
+                };
+                return (partes[0].length === 1 ? '0' + partes[0] : partes[0]) + '/' + traducaoMes[mes.toLowerCase()] + '/' + partes[2];
+            } else {
+                return 'Formato de data inválido';
+            }
+        }
+
+        function limparTextoEResultado() {
+            document.getElementById('mandadoTexto').value = '';
+            document.getElementById('resultadoFinal').textContent = '';
+            document.getElementById('possuiFotoCheckbox').checked = false;
+            updateCharCount();
+            // Colocar o foco no textarea mandadoTexto
+            document.getElementById('mandadoTexto').focus();
+        }
+
+        function copiarResultado() {
+            var resultadoFinal = document.getElementById('resultadoFinal');
+            resultadoFinal.select();
+            document.execCommand('copy');
+        }
+
+        function updateCharCount() {
+            var textarea = document.getElementById('resultadoFinal');
+            var charCount = document.getElementById('charCount');
+            charCount.textContent = textarea.value.length + ' caracteres';
+        }
+    </script>
+</body>
+
+</html>
