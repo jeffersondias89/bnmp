@@ -34,6 +34,10 @@
             font-size: 1.5rem;
         }
 
+        .titulo {
+            font-size: 1.8em;
+        }
+
         main {
             display: flex;
             flex-direction: column;
@@ -45,6 +49,7 @@
         }
 
         .textoInicial {
+            position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -116,6 +121,7 @@
         }
 
         #resultados {
+            position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -142,6 +148,14 @@
         }
 
         #charCount {
+            position: absolute;
+            bottom: 65px;
+            right: 5px;
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        #charCount1 {
             position: absolute;
             bottom: 35px;
             right: 5px;
@@ -190,28 +204,35 @@
         .custom-checkbox input:checked~.checkmark:after {
             display: flex;
         }
+
         /* Estilo da mensagem flutuante */
         #avisoFlutuante {
             position: fixed;
             top: 20px;
-            right: 20px; /* Modificado para aparecer da direita para a esquerda */
+            right: 20px;
+            /* Modificado para aparecer da direita para a esquerda */
             background-color: #4CAF50;
             color: white;
             padding: 10px;
             border-radius: 5px;
             display: none;
-            z-index: 1000; /* Garante que está acima de outros elementos */
-            transition: right 0.5s ease; /* Adicionado efeito de transição para suavizar a movimentação */
+            z-index: 1000;
+            /* Garante que está acima de outros elementos */
+            transition: right 0.5s ease;
+            /* Adicionado efeito de transição para suavizar a movimentação */
         }
     </style>
 </head>
 
 <body>
-    <header>BNMP</header>
+    <header>
+        <h1 class="titulo">BNMP</h1>
+    </header>
     <main>
         <div class="textoInicial">
-            <textarea id="mandadoTexto" cols="30" rows="10"
+            <textarea id="mandadoTexto" cols="30" rows="8"
                 placeholder="Insira o texto do mandado de prisão aqui..."></textarea>
+            <span id="charCount">0 caracteres</span>
             <label for="possuiFotoCheckbox" class="custom-checkbox">
                 <input type="checkbox" name="possuiFoto" id="possuiFotoCheckbox">
                 Possui foto?
@@ -228,17 +249,25 @@
 
         <div id="resultados">
             <h3>Resultados:</h3>
-            <textarea id="resultadoFinal" cols="30" rows="10"></textarea>
+            <textarea id="resultadoFinal" cols="30" rows="8"></textarea>
             <button id="btnCopiar" onclick="copiarResultado()">Copiar</button>
-            <span id="charCount">0 caracteres</span>
+            <span id="charCount1">0 caracteres</span>
         </div>
-         <!-- Adicione uma div para a mensagem flutuante -->
-    <div id="avisoFlutuante">Texto copiado!</div>
+        <!-- Adicione uma div para a mensagem flutuante -->
+        <div id="avisoFlutuante">Texto copiado!</div>
     </main>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             document.getElementById("btnLimpar").addEventListener("click", limparTextoEResultado);
+
+            // Adiciona um ouvinte de evento de entrada no textarea mandadoTexto
+            var mandadoTextoTextarea = document.getElementById('mandadoTexto');
+            mandadoTextoTextarea.addEventListener('input', updateCharCount);
+
+            // Adiciona um ouvinte de evento de entrada no textarea resultadoFinal
+            var resultadoFinalTextarea = document.getElementById('resultadoFinal');
+            resultadoFinalTextarea.addEventListener('input', updateCharCount1);
         });
 
         function analisarTexto() {
@@ -273,9 +302,11 @@
 
             resultadoFinal += ` - EXPEDIDO EM: ${dataExpedicao}${fotoDeteca} / COPOM CAPTURA`;
 
-            document.getElementById('resultadoFinal').textContent = resultadoFinal;
+            document.getElementById('resultadoFinal').value = resultadoFinal;
             updateCharCount();
+            updateCharCount1();
         }
+
 
         function formatarCPF(cpf) {
             cpf = cpf.replace(/\D/g, '');
@@ -322,13 +353,23 @@
         }
 
         function limparTextoEResultado() {
+            // Limpar o texto nos dois textareas
             document.getElementById('mandadoTexto').value = '';
-            document.getElementById('resultadoFinal').textContent = '';
+            document.getElementById('resultadoFinal').value = '';
+
+            // Limpar o checkbox
             document.getElementById('possuiFotoCheckbox').checked = false;
+
+            // Atualizar a contagem de caracteres
             updateCharCount();
+            updateCharCount1();
+
             // Colocar o foco no textarea mandadoTexto
             document.getElementById('mandadoTexto').focus();
         }
+
+
+
 
         function copiarResultado() {
             var resultadoFinal = document.getElementById('resultadoFinal');
@@ -349,7 +390,7 @@
             avisoFlutuante.style.display = 'block';
 
             // Esconder após 2 segundos
-            setTimeout(function() {
+            setTimeout(function () {
                 avisoFlutuante.style.display = 'none';
             }, 2000);
         }
@@ -364,8 +405,14 @@
 
 
         function updateCharCount() {
-            var textarea = document.getElementById('resultadoFinal');
+            var textarea = document.getElementById('mandadoTexto');
             var charCount = document.getElementById('charCount');
+            charCount.textContent = textarea.value.length + ' caracteres';
+        }
+
+        function updateCharCount1() {
+            var textarea = document.getElementById('resultadoFinal');
+            var charCount = document.getElementById('charCount1');
             charCount.textContent = textarea.value.length + ' caracteres';
         }
     </script>
