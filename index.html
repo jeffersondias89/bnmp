@@ -308,9 +308,9 @@
             var dataExpedicao = extrairInformacao(textoMandado, /Local e Data:.*?(\d{1,2} de \w+ de \d{4})/, formatarDataExpedicao);
 
             var possuiFoto = document.getElementById('possuiFotoCheckbox').checked;
-            var fotoDeteca = possuiFoto ? ', - POSSUI FOTO NO DETECTA' : '';
+            var fotoDeteca = possuiFoto ? ', - POSSUI FOTO' : '';
 
-            var resultadoFinal = `CONSTA VIA BNMP MANDADO DE PRISÃO CONTRA: ${nome}, - RG: ${rg} - CPF: ${cpf}, - MANDADO: ${nMandado}, - DATA DE VALIDADE: ${dataValidade}, - Nº DO PROCESSO: ${nProcesso},`;
+            var resultadoFinal = `CONSTA MANDADO DE PRISÃO VIA BNMP CONTRA: ${nome}, - RG: ${rg} - CPF: ${cpf}, - MANDADO: ${nMandado}, - DATA DE VALIDADE: ${dataValidade}, - Nº DO PROCESSO: ${nProcesso},`;
 
             if (tipPenal !== 'Não encontrado') {
                 resultadoFinal += ` - TIPIFICACAO PENAL: ${tipPenal},`;
